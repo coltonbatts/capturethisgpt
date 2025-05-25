@@ -1,6 +1,7 @@
 import { COMPANY_KNOWLEDGE } from './prompts.js';
+import { AVAILABLE_MODELS, DEFAULT_MODEL } from './models.js';
 
-export async function queryGPT(prompt, useCompanyContext = false) {
+export async function queryGPT(prompt, useCompanyContext = false, selectedModel = DEFAULT_MODEL) {
   const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
   
   if (!apiKey || apiKey === 'your_openai_api_key_here') {
@@ -8,6 +9,9 @@ export async function queryGPT(prompt, useCompanyContext = false) {
   }
 
   try {
+    // Get model configuration
+    const modelConfig = AVAILABLE_MODELS[selectedModel] || AVAILABLE_MODELS[DEFAULT_MODEL];
+    
     // Add company context if requested
     const systemMessage = useCompanyContext 
       ? `You are Capture This GPT, an AI assistant for Capture This video production company. Use the following company knowledge when relevant:\n\n${COMPANY_KNOWLEDGE}\n\nAlways respond in a helpful, professional tone.`
@@ -25,10 +29,10 @@ export async function queryGPT(prompt, useCompanyContext = false) {
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: selectedModel,
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000
+        temperature: modelConfig.temperature,
+        max_tokens: modelConfig.maxTokens
       })
     });
 
@@ -45,7 +49,7 @@ export async function queryGPT(prompt, useCompanyContext = false) {
   }
 }
 
-export async function queryGPTStreaming(prompt, useCompanyContext = false, onChunk) {
+export async function queryGPTStreaming(prompt, useCompanyContext = false, onChunk, selectedModel = DEFAULT_MODEL) {
   const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
   
   if (!apiKey || apiKey === 'your_openai_api_key_here') {
@@ -54,6 +58,9 @@ export async function queryGPTStreaming(prompt, useCompanyContext = false, onChu
   }
 
   try {
+    // Get model configuration
+    const modelConfig = AVAILABLE_MODELS[selectedModel] || AVAILABLE_MODELS[DEFAULT_MODEL];
+    
     const systemMessage = useCompanyContext 
       ? `You are Capture This GPT, an AI assistant for Capture This video production company. Use the following company knowledge when relevant:\n\n${COMPANY_KNOWLEDGE}\n\nAlways respond in a helpful, professional tone.`
       : "You are Capture This GPT, an AI assistant for Capture This video production company. Please respond in a helpful, professional tone.";
@@ -70,10 +77,10 @@ export async function queryGPTStreaming(prompt, useCompanyContext = false, onChu
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: selectedModel,
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: modelConfig.temperature,
+        max_tokens: modelConfig.maxTokens,
         stream: true
       })
     });

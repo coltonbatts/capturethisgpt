@@ -5,27 +5,34 @@ A branded, ChatGPT-style AI assistant designed specifically for the Capture This
 
 ## ✨ Features
 
-### 🎯 Core Functionality
-- **Chat Interface**: Clean, modern ChatGPT-style conversation interface with sidebar navigation
-- **Chat Management**: Full chat history with persistence, search, and easy navigation
-- **AI-Powered Responses**: Integrated with OpenAI GPT-4 for intelligent responses
-- **Preset Templates**: Quick-action buttons for common production tasks
-- **Company Context**: Built-in knowledge base with SOPs and procedures
-- **Theme Toggle**: Switch between dark and light modes
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+### Core Chat Experience
+- **Intelligent Chat Interface** - Clean, ChatGPT-style UI with dark/light theme support
+- **Professional AI Assistant** - Specialized for video production and client communication
+- **Smart Message Handling** - Auto-scrolling, typing indicators, and error handling
+- **Preset Templates** - Quick-start buttons for common workflows (Frame.io analysis, client emails, SOPs)
 
-### 🚀 Quick Actions
-- **Summarize Frame.io Comments**: Analyze client feedback and extract key edit notes
-- **Draft Client Email**: Generate professional client communication
-- **Company SOPs**: Access internal procedures and workflow information
+### Advanced Sidebar & Chat Management
+- **Persistent Chat History** - Automatic saving to localStorage with no data loss
+- **Smart Chat Organization** - Chats grouped by time periods (Today, Yesterday, Previous 7 Days, etc.)
+- **Intelligent Chat Titles** - Auto-generated titles from first user message
+- **Seamless Chat Switching** - Click any chat to instantly load full conversation history
+- **Real-time Auto-save** - Messages saved automatically as you type (500ms debounce)
+- **Chat Search** - Find any conversation instantly with built-in search
+- **Chat Management** - Delete unwanted chats with hover-to-show delete buttons
+- **Session Persistence** - Sidebar state, theme preferences, and model selection saved
 
-### 🎨 Design Features
-- **Branded Interface**: Custom orange (#F97316) theme for Capture This
-- **Dark/Light Mode**: Toggle between professional themes optimized for any work environment
-- **Sidebar Navigation**: ChatGPT-style sidebar with search and library access
-- **Chat History**: Visual indicators for active chats and organized time-based grouping
-- **Modern Typography**: Inter font for clean, readable text
-- **Smooth Animations**: Typing indicators, transitions, and responsive hover effects
+### Professional Video Production Focus
+- **Frame.io Integration** - Analyze client feedback and extract actionable insights
+- **Client Communication** - Draft professional emails and project updates
+- **SOP Knowledge Base** - Access company procedures and workflows
+- **Multi-Model Support** - Switch between GPT models (GPT-4o, GPT-4, GPT-3.5 Turbo)
+
+### User Experience Excellence
+- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- **Keyboard Shortcuts** - Enter to send, Shift+Enter for new line
+- **Visual Feedback** - Loading states, active chat indicators, hover effects
+- **Theme Persistence** - Dark/light mode preference saved across sessions
+- **Error Recovery** - Graceful handling of API errors with helpful messages
 
 ## 🛠 Tech Stack
 
@@ -157,64 +164,4 @@ src/
 3. Deploy automatically on every commit
 
 ### Manual Build
-```bash
-npm run build
-# Upload the `build` folder to your hosting provider
 ```
-
-## 🔮 Future Enhancements
-
-### Phase 2 Features
-- [ ] File upload for documents and SOPs
-- [ ] Extended chat history with cloud persistence
-- [ ] User authentication for team members
-- [ ] Frame.io API direct integration
-- [ ] Google Drive document integration
-- [ ] Library feature with saved prompts and templates
-- [ ] Export chat conversations to PDF/text
-
-### Phase 3 Features
-- [ ] Voice input/output capabilities
-- [ ] Advanced RAG with vector database
-- [ ] Custom model fine-tuning
-- [ ] Analytics and usage tracking
-- [ ] Multi-language support
-
-## 🛡 Security Notes
-
-- API keys are stored in environment variables
-- No sensitive data is logged or stored
-- All API calls are made from the client side
-- Consider implementing rate limiting for production
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**API Key Error**
-- Ensure your OpenAI API key is correctly set in `.env`
-- Verify the key has sufficient credits and permissions
-
-**Styling Issues**
-- Run `npm run build` to ensure Tailwind is compiled correctly
-- Check that all Tailwind directives are properly imported
-
-**Build Errors**
-- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-- Ensure all dependencies are compatible
-
-## 📄 License
-
-This project is for internal use by Capture This video production company.
-
-## 🤝 Contributing
-
-For internal team members:
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
-
----
-
-**Built with ❤️ for the Capture This team**

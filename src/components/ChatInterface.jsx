@@ -1,26 +1,118 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MessageBubble from './MessageBubble';
 import PromptInput from './PromptInput';
+import ModelSwitcher from './ModelSwitcher';
 import { queryGPT } from '../lib/api';
 import { PRESET_BUTTONS } from '../lib/prompts';
+import { DEFAULT_MODEL } from '../lib/models';
+
+// Utility functions for localStorage persistence
+const STORAGE_KEY = 'captureThisGPT_chatHistory';
+const SETTINGS_KEY = 'captureThisGPT_settings';
+
+const saveChatHistoryToStorage = (chatHistory) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+  } catch (error) {
+    console.error('Failed to save chat history to localStorage:', error);
+  }
+};
+
+const loadChatHistoryFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Failed to load chat history from localStorage:', error);
+    return [];
+  }
+};
+
+const saveSettingsToStorage = (settings) => {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch (error) {
+    console.error('Failed to save settings to localStorage:', error);
+  }
+};
+
+const loadSettingsFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : { 
+      isDarkMode: true, 
+      sidebarOpen: true,
+      selectedModel: DEFAULT_MODEL 
+    };
+  } catch (error) {
+    console.error('Failed to load settings from localStorage:', error);
+    return { 
+      isDarkMode: true, 
+      sidebarOpen: true,
+      selectedModel: DEFAULT_MODEL 
+    };
+  }
+};
+
+// Helper function to format timestamps
+const formatTimestamp = (date) => {
+  const now = new Date();
+  const messageDate = new Date(date);
+  const diffInDays = Math.floor((now - messageDate) / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays === 0) return 'Today';
+  if (diffInDays === 1) return 'Yesterday';
+  if (diffInDays <= 7) return 'Previous 7 Days';
+  if (diffInDays <= 30) return 'Previous 30 Days';
+  return 'Older';
+};
+
+// Helper function to generate a smart title from the first message
+const generateChatTitle = (firstMessage) => {
+  if (!firstMessage || !firstMessage.trim()) return 'New Chat';
+  
+  // Clean up the message and create a concise title
+  const cleaned = firstMessage.trim();
+  if (cleaned.length <= 40) return cleaned;
+  
+  // Find a good break point near 40 characters
+  const truncated = cleaned.substring(0, 40);
+  const lastSpace = truncated.lastIndexOf(' ');
+  
+  return lastSpace > 20 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+};
 
 const ChatInterface = () => {
+  // Load persisted settings
+  const [settings, setSettings] = useState(loadSettingsFromStorage());
+  
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true); // Default to dark like ChatGPT
-  const [chatHistory, setChatHistory] = useState([
-    { id: 1, title: "Frame.io feedback analysis", timestamp: "Today", messages: [] },
-    { id: 2, title: "Client email drafting", timestamp: "Today", messages: [] },
-    { id: 3, title: "Production workflow SOPs", timestamp: "Yesterday", messages: [] },
-    { id: 4, title: "Color correction guidelines", timestamp: "Yesterday", messages: [] },
-    { id: 5, title: "Equipment maintenance", timestamp: "Previous 7 Days", messages: [] },
-  ]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedModel, setSelectedModel] = useState(settings.selectedModel);
+  const [isDarkMode, setIsDarkMode] = useState(settings.isDarkMode);
+  const [chatHistory, setChatHistory] = useState(loadChatHistoryFromStorage());
+  const [sidebarOpen, setSidebarOpen] = useState(settings.sidebarOpen);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Save settings whenever they change
+  useEffect(() => {
+    const newSettings = {
+      isDarkMode,
+      sidebarOpen,
+      selectedModel
+    };
+    setSettings(newSettings);
+    saveSettingsToStorage(newSettings);
+  }, [isDarkMode, sidebarOpen, selectedModel]);
+
+  // Save chat history whenever it changes
+  useEffect(() => {
+    saveChatHistoryToStorage(chatHistory);
+  }, [chatHistory]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,18 +135,26 @@ const ChatInterface = () => {
     if (currentChatId && messages.length > 0) {
       setChatHistory(prev => prev.map(chat => 
         chat.id === currentChatId 
-          ? { ...chat, messages: [...messages] }
+          ? { 
+              ...chat, 
+              messages: [...messages],
+              updatedAt: new Date().toISOString(),
+              // Update title if it's still generic and we have a first user message
+              title: chat.title === 'New Chat' && messages.length > 0 && messages[0].isUser 
+                ? generateChatTitle(messages[0].text)
+                : chat.title
+            }
           : chat
       ));
     }
-  }, [currentChatId, messages, setChatHistory]);
+  }, [currentChatId, messages]);
 
+  // Auto-save current chat when messages change
   useEffect(() => {
-    // Auto-save current chat when messages change
     if (currentChatId && messages.length > 0) {
       const timer = setTimeout(() => {
         saveCurrentChat();
-      }, 1000); // Save after 1 second of inactivity
+      }, 500); // Save after 500ms of inactivity for better performance
       
       return () => clearTimeout(timer);
     }
@@ -63,15 +163,18 @@ const ChatInterface = () => {
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
 
+    let currentMessages = [...messages];
+
     // If this is the first message, initialize with welcome
-    if (messages.length === 0) {
+    if (currentMessages.length === 0) {
       const welcomeMessage = {
         id: Date.now() - 1,
         text: "Hello! I'm Capture This GPT, your AI assistant for video production. I can help you analyze Frame.io feedback, draft client communications, answer questions about SOPs, and assist with general production workflows.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       };
-      setMessages([welcomeMessage]);
+      currentMessages.push(welcomeMessage);
+      setMessages(currentMessages);
     }
 
     // Add user message
@@ -79,10 +182,11 @@ const ChatInterface = () => {
       id: Date.now(),
       text: message,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    currentMessages.push(userMessage);
+    setMessages(currentMessages);
     setIsLoading(true);
 
     try {
@@ -98,32 +202,46 @@ const ChatInterface = () => {
         finalPrompt = selectedPreset.prompt + message;
       }
 
-      const response = await queryGPT(finalPrompt, useCompanyContext);
+      const response = await queryGPT(finalPrompt, useCompanyContext, selectedModel);
 
       // Add AI response
       const aiMessage = {
         id: Date.now() + 1,
         text: response,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      const updatedMessages = [...currentMessages, aiMessage];
+      setMessages(updatedMessages);
       
-      // Add to chat history if this is a new chat
+      // Create or update chat in history
       if (!currentChatId) {
+        // Create new chat
         const newChatId = Date.now() + 2;
+        const chatTitle = generateChatTitle(message);
         const newChat = {
           id: newChatId,
-          title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
-          timestamp: "Today",
-          messages: [userMessage, aiMessage]
+          title: chatTitle,
+          timestamp: formatTimestamp(new Date()),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          messages: updatedMessages
         };
         setChatHistory(prev => [newChat, ...prev]);
         setCurrentChatId(newChatId);
       } else {
-        // Save current chat with updated messages
-        saveCurrentChat();
+        // Update existing chat
+        setChatHistory(prev => prev.map(chat => 
+          chat.id === currentChatId 
+            ? { 
+                ...chat, 
+                messages: updatedMessages,
+                updatedAt: new Date().toISOString(),
+                timestamp: formatTimestamp(new Date())
+              }
+            : chat
+        ));
       }
 
     } catch (error) {
@@ -132,7 +250,7 @@ const ChatInterface = () => {
         id: Date.now() + 1,
         text: "I apologize, but I encountered an error. Please check your API key configuration and try again.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -146,16 +264,50 @@ const ChatInterface = () => {
   };
 
   const startNewChat = () => {
+    // Save current chat before starting new one
+    if (currentChatId && messages.length > 0) {
+      saveCurrentChat();
+    }
+    
     setMessages([]);
     setSelectedPreset(null);
     setCurrentChatId(null);
   };
 
+  const handleModelChange = (modelId) => {
+    setSelectedModel(modelId);
+  };
+
   const loadChat = (chatId) => {
+    // Save current chat before switching
+    if (currentChatId && messages.length > 0) {
+      saveCurrentChat();
+    }
+    
     const chat = chatHistory.find(c => c.id === chatId);
     if (chat) {
-      setMessages(chat.messages);
+      setMessages(chat.messages || []);
       setCurrentChatId(chatId);
+      setSelectedPreset(null);
+      
+      // Update timestamp to reflect recent access
+      setChatHistory(prev => prev.map(c => 
+        c.id === chatId 
+          ? { ...c, timestamp: formatTimestamp(new Date()) }
+          : c
+      ));
+    }
+  };
+
+  const deleteChat = (chatId, event) => {
+    event.stopPropagation(); // Prevent loading the chat when delete is clicked
+    
+    setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
+    
+    // If we're deleting the current chat, start a new one
+    if (currentChatId === chatId) {
+      setMessages([]);
+      setCurrentChatId(null);
       setSelectedPreset(null);
     }
   };
@@ -179,6 +331,20 @@ const ChatInterface = () => {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
+
+  // Group chats by time period for better organization
+  const groupedChats = chatHistory.reduce((groups, chat) => {
+    const period = chat.timestamp;
+    if (!groups[period]) {
+      groups[period] = [];
+    }
+    groups[period].push(chat);
+    return groups;
+  }, {});
+
+  // Sort periods by recency
+  const sortedPeriods = ['Today', 'Yesterday', 'Previous 7 Days', 'Previous 30 Days', 'Older']
+    .filter(period => groupedChats[period]?.length > 0);
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -239,37 +405,56 @@ const ChatInterface = () => {
 
             {/* Chat History */}
             <div className="mt-4">
-              {['Today', 'Yesterday', 'Previous 7 Days'].map(period => {
-                const filteredChats = chatHistory.filter(chat => {
-                  const matchesPeriod = chat.timestamp === period;
-                  const matchesSearch = !searchTerm || chat.title.toLowerCase().includes(searchTerm.toLowerCase());
-                  return matchesPeriod && matchesSearch;
-                });
+              {chatHistory.length === 0 ? (
+                <div className="px-3 py-4 text-center text-gray-400 text-sm">
+                  No chat history yet.<br />Start a conversation to see it here.
+                </div>
+              ) : (
+                sortedPeriods.map(period => {
+                  const filteredChats = groupedChats[period].filter(chat => {
+                    const matchesSearch = !searchTerm || chat.title.toLowerCase().includes(searchTerm.toLowerCase());
+                    return matchesSearch;
+                  });
 
-                if (filteredChats.length === 0) return null;
+                  if (filteredChats.length === 0) return null;
 
-                return (
-                  <div key={period}>
-                    <div className="text-xs text-gray-400 px-3 py-2 font-medium mt-4 first:mt-0">{period}</div>
-                    {filteredChats.map(chat => (
-                      <button 
-                        key={chat.id} 
-                        onClick={() => loadChat(chat.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors group relative ${
-                          currentChatId === chat.id ? 'bg-gray-700' : ''
-                        }`}
-                      >
-                        <div className="text-sm text-gray-200 truncate pr-6">{chat.title}</div>
-                        {currentChatId === chat.id && (
-                          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  return (
+                    <div key={period}>
+                      <div className="text-xs text-gray-400 px-3 py-2 font-medium mt-4 first:mt-0">{period}</div>
+                      {filteredChats
+                        .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+                        .map(chat => (
+                          <div key={chat.id} className="relative group">
+                            <button 
+                              onClick={() => loadChat(chat.id)}
+                              className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors group-hover:pr-8 ${
+                                currentChatId === chat.id ? 'bg-gray-700' : ''
+                              }`}
+                            >
+                              <div className="text-sm text-gray-200 truncate">{chat.title}</div>
+                              {currentChatId === chat.id && (
+                                <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                </div>
+                              )}
+                            </button>
+                            
+                            {/* Delete button - shown on hover */}
+                            <button
+                              onClick={(e) => deleteChat(chat.id, e)}
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-600 rounded"
+                              title="Delete chat"
+                            >
+                              <svg className="w-3 h-3 text-gray-400 hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                );
-              })}
+                      ))}
+                    </div>
+                  );
+                })
+              )}
               
               {searchTerm && chatHistory.filter(chat => 
                 chat.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -329,7 +514,7 @@ const ChatInterface = () => {
               </svg>
             </button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <img 
                 src="/ct-logo.png" 
                 alt="Capture This" 
@@ -338,12 +523,11 @@ const ChatInterface = () => {
               <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 Capture This GPT
               </span>
-              <span className="text-xs px-2 py-1 rounded-full" style={{ 
-                backgroundColor: 'var(--bg-secondary)', 
-                color: 'var(--text-secondary)' 
-              }}>
-                4o
-              </span>
+              <ModelSwitcher 
+                currentModel={selectedModel}
+                onModelChange={handleModelChange}
+                isDarkMode={isDarkMode}
+              />
             </div>
           </div>
           
