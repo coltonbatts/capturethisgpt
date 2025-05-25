@@ -1,4 +1,5 @@
 # 🧠 Capture This GPT
+![CT Smiley](https://i.ibb.co/CK4RjcCr/CT-Smiley-Sticker-Design-copy.png)
 
 A branded, ChatGPT-style AI assistant designed specifically for the Capture This video production team. This application helps with Frame.io feedback analysis, client communications, and company SOP queries.
 
