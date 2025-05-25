@@ -7,10 +7,12 @@ A branded, ChatGPT-style AI assistant designed specifically for the Capture This
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **Chat Interface**: Clean, modern ChatGPT-style conversation interface
+- **Chat Interface**: Clean, modern ChatGPT-style conversation interface with sidebar navigation
+- **Chat Management**: Full chat history with persistence, search, and easy navigation
 - **AI-Powered Responses**: Integrated with OpenAI GPT-4 for intelligent responses
 - **Preset Templates**: Quick-action buttons for common production tasks
 - **Company Context**: Built-in knowledge base with SOPs and procedures
+- **Theme Toggle**: Switch between dark and light modes
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ### 🚀 Quick Actions
@@ -20,9 +22,11 @@ A branded, ChatGPT-style AI assistant designed specifically for the Capture This
 
 ### 🎨 Design Features
 - **Branded Interface**: Custom orange (#F97316) theme for Capture This
-- **Dark Mode**: Professional dark theme optimized for video production work
+- **Dark/Light Mode**: Toggle between professional themes optimized for any work environment
+- **Sidebar Navigation**: ChatGPT-style sidebar with search and library access
+- **Chat History**: Visual indicators for active chats and organized time-based grouping
 - **Modern Typography**: Inter font for clean, readable text
-- **Smooth Animations**: Typing indicators and smooth transitions
+- **Smooth Animations**: Typing indicators, transitions, and responsive hover effects
 
 ## 🛠 Tech Stack
 
@@ -88,6 +92,13 @@ Edit `src/lib/prompts.js` to update:
 2. Press Enter or click the send button
 3. Receive AI-powered responses tailored to video production
 
+### Navigation & Chat Management
+1. **New Chat**: Click "New chat" in the sidebar to start fresh conversations
+2. **Search Chats**: Click "Search chats" and type to filter your conversation history
+3. **Load Previous Chats**: Click any chat in the history to continue where you left off
+4. **Theme Toggle**: Use the sun/moon icon in the profile section to switch themes
+5. **Auto-Save**: Conversations are automatically saved as you chat
+
 ### Using Preset Templates
 1. Click on any of the quick action buttons:
    - "Summarize Frame.io Comments"
@@ -109,16 +120,16 @@ Edit `src/lib/prompts.js` to update:
 ```
 src/
 ├── components/
-│   ├── ChatInterface.jsx     # Main chat container
-│   ├── MessageBubble.jsx     # Individual message display
-│   ├── PromptInput.jsx       # User input component
-│   └── PresetPromptBar.jsx   # Quick action buttons
+│   ├── ChatInterface.jsx     # Main chat container with sidebar navigation
+│   ├── MessageBubble.jsx     # Individual message display component
+│   └── PromptInput.jsx       # User input component with submit handling
 ├── lib/
-│   ├── api.js               # OpenAI API integration
-│   └── prompts.js           # Templates and knowledge base
+│   ├── api.js               # OpenAI API integration and context switching
+│   └── prompts.js           # Preset templates and company knowledge base
 ├── App.js                   # Main application component
-├── index.css               # Tailwind directives and custom styles
-└── index.js                # React DOM render
+├── App.css                  # Additional component styles
+├── index.css               # Tailwind directives and custom CSS variables
+└── index.js                # React DOM render entry point
 ```
 
 ## 🎯 MVP Checklist
@@ -132,6 +143,12 @@ src/
 - [x] Responsive design with Tailwind CSS
 - [x] Error handling for API calls
 - [x] Loading states and typing indicators
+- [x] Sidebar navigation with ChatGPT-style layout
+- [x] Chat history persistence and management
+- [x] Search functionality for filtering chats
+- [x] Theme toggle (dark/light mode)
+- [x] Auto-saving of conversations
+- [x] Visual indicators for active chats
 
 ## 🚀 Deployment
 
@@ -150,10 +167,12 @@ npm run build
 
 ### Phase 2 Features
 - [ ] File upload for documents and SOPs
-- [ ] Chat history persistence (localStorage)
+- [ ] Extended chat history with cloud persistence
 - [ ] User authentication for team members
 - [ ] Frame.io API direct integration
 - [ ] Google Drive document integration
+- [ ] Library feature with saved prompts and templates
+- [ ] Export chat conversations to PDF/text
 
 ### Phase 3 Features
 - [ ] Voice input/output capabilities
