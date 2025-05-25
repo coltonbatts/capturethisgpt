@@ -1,70 +1,202 @@
-# Getting Started with Create React App
+# 🧠 Capture This GPT
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A branded, ChatGPT-style AI assistant designed specifically for the Capture This video production team. This application helps with Frame.io feedback analysis, client communications, and company SOP queries.
 
-## Available Scripts
+![Capture This GPT Screenshot](https://via.placeholder.com/800x400/F97316/FFFFFF?text=Capture+This+GPT)
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+### 🎯 Core Functionality
+- **Chat Interface**: Clean, modern ChatGPT-style conversation interface
+- **AI-Powered Responses**: Integrated with OpenAI GPT-4 for intelligent responses
+- **Preset Templates**: Quick-action buttons for common production tasks
+- **Company Context**: Built-in knowledge base with SOPs and procedures
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🚀 Quick Actions
+- **Summarize Frame.io Comments**: Analyze client feedback and extract key edit notes
+- **Draft Client Email**: Generate professional client communication
+- **Company SOPs**: Access internal procedures and workflow information
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🎨 Design Features
+- **Branded Interface**: Custom orange (#F97316) theme for Capture This
+- **Dark Mode**: Professional dark theme optimized for video production work
+- **Modern Typography**: Inter font for clean, readable text
+- **Smooth Animations**: Typing indicators and smooth transitions
 
-### `npm test`
+## 🛠 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend**: React.js with functional components
+- **Styling**: Tailwind CSS with custom brand colors
+- **AI Integration**: OpenAI GPT-4 API
+- **State Management**: React hooks (useState, useEffect)
+- **Build Tool**: Create React App
 
-### `npm run build`
+## 📦 Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+- OpenAI API key
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Setup Steps
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd CaptureThisGPT
+   ```
 
-### `npm run eject`
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   REACT_APP_OPENAI_API_KEY=your_openai_api_key_here
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+5. **Open your browser**
+   Navigate to `http://localhost:3000`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🔧 Configuration
 
-## Learn More
+### OpenAI API Key
+1. Visit [OpenAI Platform](https://platform.openai.com)
+2. Create an account or sign in
+3. Generate a new API key
+4. Add it to your `.env` file
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Customizing Company Knowledge
+Edit `src/lib/prompts.js` to update:
+- Company SOPs and procedures
+- Contact information
+- Workflow guidelines
+- Common troubleshooting steps
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📚 Usage
 
-### Code Splitting
+### Basic Chat
+1. Type your question in the input field
+2. Press Enter or click the send button
+3. Receive AI-powered responses tailored to video production
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Using Preset Templates
+1. Click on any of the quick action buttons:
+   - "Summarize Frame.io Comments"
+   - "Draft Client Email" 
+   - "Company SOPs"
+2. Follow the placeholder text guidance
+3. Submit your specific content or question
 
-### Analyzing the Bundle Size
+### Frame.io Feedback Analysis
+1. Click "Summarize Frame.io Comments"
+2. Paste client feedback from Frame.io
+3. Get structured analysis with:
+   - Top 3 edit notes
+   - Client tone assessment
+   - Suggested next steps
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🏗 Project Structure
 
-### Making a Progressive Web App
+```
+src/
+├── components/
+│   ├── ChatInterface.jsx     # Main chat container
+│   ├── MessageBubble.jsx     # Individual message display
+│   ├── PromptInput.jsx       # User input component
+│   └── PresetPromptBar.jsx   # Quick action buttons
+├── lib/
+│   ├── api.js               # OpenAI API integration
+│   └── prompts.js           # Templates and knowledge base
+├── App.js                   # Main application component
+├── index.css               # Tailwind directives and custom styles
+└── index.js                # React DOM render
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 🎯 MVP Checklist
 
-### Advanced Configuration
+- [x] Chat-style interface with scrolling messages
+- [x] Branded header (Capture This GPT logo and name)
+- [x] Input field for natural language questions
+- [x] Preset buttons for common workflows
+- [x] Company knowledge base with SOPs
+- [x] OpenAI GPT-4 integration
+- [x] Responsive design with Tailwind CSS
+- [x] Error handling for API calls
+- [x] Loading states and typing indicators
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🚀 Deployment
 
-### Deployment
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on every commit
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Manual Build
+```bash
+npm run build
+# Upload the `build` folder to your hosting provider
+```
 
-### `npm run build` fails to minify
+## 🔮 Future Enhancements
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Phase 2 Features
+- [ ] File upload for documents and SOPs
+- [ ] Chat history persistence (localStorage)
+- [ ] User authentication for team members
+- [ ] Frame.io API direct integration
+- [ ] Google Drive document integration
+
+### Phase 3 Features
+- [ ] Voice input/output capabilities
+- [ ] Advanced RAG with vector database
+- [ ] Custom model fine-tuning
+- [ ] Analytics and usage tracking
+- [ ] Multi-language support
+
+## 🛡 Security Notes
+
+- API keys are stored in environment variables
+- No sensitive data is logged or stored
+- All API calls are made from the client side
+- Consider implementing rate limiting for production
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**API Key Error**
+- Ensure your OpenAI API key is correctly set in `.env`
+- Verify the key has sufficient credits and permissions
+
+**Styling Issues**
+- Run `npm run build` to ensure Tailwind is compiled correctly
+- Check that all Tailwind directives are properly imported
+
+**Build Errors**
+- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+- Ensure all dependencies are compatible
+
+## 📄 License
+
+This project is for internal use by Capture This video production company.
+
+## 🤝 Contributing
+
+For internal team members:
+1. Create a feature branch
+2. Make your changes
+3. Test thoroughly
+4. Submit a pull request
+
+---
+
+**Built with ❤️ for the Capture This team**
