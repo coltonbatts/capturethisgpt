@@ -285,9 +285,11 @@ const ChatInterface = () => {
           <div className="p-3 border-t border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-sm font-medium">
-                  CT
-                </div>
+                <img 
+                  src="/ct-logo.png" 
+                  alt="Capture This" 
+                  className="w-8 h-8 rounded-full object-cover"
+                />
                 <span className="text-sm text-gray-200">Capture This Team</span>
               </div>
               <button
@@ -328,12 +330,11 @@ const ChatInterface = () => {
             </button>
             
             <div className="flex items-center gap-2">
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-white text-sm"
-                style={{ backgroundColor: 'var(--brand-color)' }}
-              >
-                CT
-              </div>
+              <img 
+                src="/ct-logo.png" 
+                alt="Capture This" 
+                className="w-8 h-8 rounded-lg object-cover"
+              />
               <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 Capture This GPT
               </span>
@@ -358,91 +359,129 @@ const ChatInterface = () => {
         {/* Chat Messages or Empty State */}
         <div className="flex-1 overflow-y-auto">
           {messages.length === 0 ? (
-            // Empty State - Like ChatGPT
+            // Empty State - Centered ChatGPT Style
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <h1 className="text-3xl font-medium mb-8" style={{ color: 'var(--text-primary)' }}>
-                Ready when you are.
-              </h1>
-              
-              {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl w-full mb-8">
-                {PRESET_BUTTONS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => handlePresetClick(preset)}
-                    className="p-4 text-left rounded-xl border hover:border-gray-400 transition-colors"
-                    style={{
-                      backgroundColor: 'var(--bg-tertiary)',
-                      borderColor: 'var(--border-light)',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    <div className="font-medium text-sm mb-2">{preset.label}</div>
-                    <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {preset.placeholder}
+              <div className="w-full max-w-3xl">
+                <h1 className="text-3xl font-medium mb-8" style={{ color: 'var(--text-primary)' }}>
+                  Ready when you are.
+                </h1>
+                
+                {/* Centered Input */}
+                <div className="mb-8">
+                  <PromptInput
+                    onSendMessage={handleSendMessage}
+                    disabled={isLoading}
+                    placeholder={
+                      selectedPreset 
+                        ? selectedPreset.placeholder 
+                        : "Ask anything"
+                    }
+                  />
+                  
+                  {/* Selected Preset Indicator */}
+                  {selectedPreset && (
+                    <div className="mt-2 flex items-center justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <span>Using template: {selectedPreset.label}</span>
+                      <button
+                        onClick={() => setSelectedPreset(null)}
+                        className="hover:underline"
+                        style={{ color: 'var(--brand-color)' }}
+                      >
+                        Clear
+                      </button>
                     </div>
-                  </button>
-                ))}
+                  )}
+                  
+                  <div className="text-xs text-center mt-2" style={{ color: 'var(--text-secondary)' }}>
+                    Capture This GPT can make mistakes. Consider checking important information.
+                  </div>
+                </div>
+                
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl mx-auto">
+                  {PRESET_BUTTONS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => handlePresetClick(preset)}
+                      className="p-4 text-left rounded-xl border hover:border-gray-400 transition-colors"
+                      style={{
+                        backgroundColor: 'var(--bg-tertiary)',
+                        borderColor: 'var(--border-light)',
+                        color: 'var(--text-primary)'
+                      }}
+                    >
+                      <div className="font-medium text-sm mb-2">{preset.label}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        {preset.placeholder}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
-            // Messages
-            <div className="max-w-4xl mx-auto w-full">
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message.text}
-                  isUser={message.isUser}
-                />
-              ))}
+            // Messages + Input at bottom
+            <div className="h-full flex flex-col">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="max-w-4xl mx-auto w-full">
+                  {messages.map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      message={message.text}
+                      isUser={message.isUser}
+                    />
+                  ))}
+                  
+                  {isLoading && (
+                    <MessageBubble
+                      message=""
+                      isUser={false}
+                      isTyping={true}
+                    />
+                  )}
+                  
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
               
-              {isLoading && (
-                <MessageBubble
-                  message=""
-                  isUser={false}
-                  isTyping={true}
-                />
-              )}
-              
-              <div ref={messagesEndRef} />
+              {/* Input Area - Bottom when messages exist */}
+              <div className="border-t p-4" style={{ 
+                borderColor: 'var(--border-light)', 
+                backgroundColor: 'var(--bg-primary)' 
+              }}>
+                <div className="max-w-4xl mx-auto">
+                  <PromptInput
+                    onSendMessage={handleSendMessage}
+                    disabled={isLoading}
+                    placeholder={
+                      selectedPreset 
+                        ? selectedPreset.placeholder 
+                        : "Ask anything"
+                    }
+                  />
+                  
+                  {/* Selected Preset Indicator */}
+                  {selectedPreset && (
+                    <div className="mt-2 flex items-center justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <span>Using template: {selectedPreset.label}</span>
+                      <button
+                        onClick={() => setSelectedPreset(null)}
+                        className="hover:underline"
+                        style={{ color: 'var(--brand-color)' }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                  
+                  <div className="text-xs text-center mt-2" style={{ color: 'var(--text-secondary)' }}>
+                    Capture This GPT can make mistakes. Consider checking important information.
+                  </div>
+                </div>
+              </div>
             </div>
           )}
-        </div>
-
-        {/* Input Area */}
-        <div className="border-t p-4" style={{ 
-          borderColor: 'var(--border-light)', 
-          backgroundColor: 'var(--bg-primary)' 
-        }}>
-          <div className="max-w-4xl mx-auto">
-            <PromptInput
-              onSendMessage={handleSendMessage}
-              disabled={isLoading}
-              placeholder={
-                selectedPreset 
-                  ? selectedPreset.placeholder 
-                  : "Ask anything"
-              }
-            />
-            
-            {/* Selected Preset Indicator */}
-            {selectedPreset && (
-              <div className="mt-2 flex items-center justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <span>Using template: {selectedPreset.label}</span>
-                <button
-                  onClick={() => setSelectedPreset(null)}
-                  className="hover:underline"
-                  style={{ color: 'var(--brand-color)' }}
-                >
-                  Clear
-                </button>
-              </div>
-            )}
-            
-            <div className="text-xs text-center mt-2" style={{ color: 'var(--text-secondary)' }}>
-              Capture This GPT can make mistakes. Consider checking important information.
-            </div>
-          </div>
         </div>
       </div>
     </div>
