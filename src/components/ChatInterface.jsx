@@ -39,16 +39,22 @@ const saveSettingsToStorage = (settings) => {
 const loadSettingsFromStorage = () => {
   try {
     const stored = localStorage.getItem(SETTINGS_KEY);
+    // Check if we're on mobile (screen width < 768px)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const defaultSidebarOpen = !isMobile; // Collapsed on mobile, open on desktop
+    
     return stored ? JSON.parse(stored) : { 
       isDarkMode: true, 
-      sidebarOpen: true,
+      sidebarOpen: defaultSidebarOpen,
       selectedModel: DEFAULT_MODEL 
     };
   } catch (error) {
     console.error('Failed to load settings from localStorage:', error);
+    // Check if we're on mobile for error fallback too
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     return { 
       isDarkMode: true, 
-      sidebarOpen: true,
+      sidebarOpen: !isMobile,
       selectedModel: DEFAULT_MODEL 
     };
   }
@@ -130,6 +136,25 @@ const ChatInterface = () => {
       document.documentElement.removeAttribute('data-theme');
     }
   }, [isDarkMode]);
+
+  // Handle responsive sidebar behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Check initial size
+    handleResize();
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen]);
 
   const saveCurrentChat = useCallback(() => {
     if (currentChatId && messages.length > 0) {
@@ -348,9 +373,17 @@ const ChatInterface = () => {
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar - ChatGPT Style */}
       <div 
-        className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden`}
+        className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden relative z-50 md:relative md:z-auto ${sidebarOpen ? 'fixed md:relative' : ''}`}
         style={{ backgroundColor: '#171717' }}
       >
         <div className="flex flex-col h-full text-white">
